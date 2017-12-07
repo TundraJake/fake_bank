@@ -29,13 +29,13 @@ app.config.update(dict(
 app.config.from_envvar('MUHBANK_SETTINGS', silent=True)
 
 
-# Create a connection to database.
-connection = pymysql.connect(host='localhost', 
-							port=3306, 
-							user='banker', 
-							passwd='banking', 
-							db='MuhBank',
-							unix_socket="/tmp/mysql.sock")
+# # Create a connection to database.
+# connection = pymysql.connect(host='localhost', 
+# 							port=3306, 
+# 							user='banker', 
+# 							passwd='banking', 
+# 							db='MuhBank',
+# 							unix_socket="/tmp/mysql.sock")
 
 def connect_db():
 	"""Connects to the specific database."""
