@@ -1,0 +1,1 @@
+from .muh_bank import app

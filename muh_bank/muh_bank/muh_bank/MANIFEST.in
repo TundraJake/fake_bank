@@ -1,0 +1,3 @@
+graft muh_bank/templates
+graft muh_bank/static
+include muh_bank/schema.sql
