@@ -37,11 +37,11 @@ app.config.from_envvar('MUHBANK_SETTINGS', silent=True)
 # 							db='MuhBank',
 # 							unix_socket="/tmp/mysql.sock")
 
-def connect_db():
-	"""Connects to the specific database."""
+# def connect_db():
+# 	"""Connects to the specific database."""
 	
-	cursor = connection.cursor()
-	print('Cant do this anymore')
+# 	cursor = connection.cursor()
+# 	print('Cant do this anymore')
 
 	# return rv
 
@@ -56,7 +56,7 @@ def show_entries():
     # db = get_db()
     # cur = db.execute('select title, text from entries order by id desc')
     # entries = cur.fetchall()
-    return render_template('html/show_entries.html', entries=entries)
+    return render_template('html/show_entries.html')
 
 @app.route('/logged_in')
 def loggedIn():
