@@ -67,7 +67,12 @@ def logout():
     session.pop('logged_in', None)
     flash('You were logged out')
     return redirect(url_for('show_entries'))
+for x in xrange(1,10):
+	pass
 
+
+
+	
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
