@@ -39,7 +39,11 @@ def show_entries():
 	# db = get_db()
 	# cur = db.execute('select title, text from entries order by id desc')
 	# entries = cur.fetchall()
-	return render_template('html/show_entries.html')
+	return render_template('html/home.html')
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+	return 1
 
 @app.route('/logged_in')
 def loggedIn():
