@@ -146,7 +146,7 @@ def is_logged_in(f):
 			return redirect(url_for('login'))
 	return wrap
 
-
+# Called in transfer to update the User's session savings balance.
 def setSavingBalance(curs, amount):
 	# Update transfering user account saving balance
 	curs.execute("SELECT * FROM Accounts WHERE id = %s;", [session['accountID']])
@@ -157,6 +157,7 @@ def setSavingBalance(curs, amount):
 
 	return total
 
+# Called in transfer to update the User's session checking balance.
 def setCheckingBalance(curs, amount):
 	# Update transfering user account saving balance
 	curs.execute("SELECT * FROM Accounts WHERE id = %s;", [session['accountID']])
