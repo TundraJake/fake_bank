@@ -18,6 +18,16 @@ class UserRegisterForm(Form):
 	])
 	confirm = PasswordField('Confirm Password')
 
+# Account registration
+class AccountRegisterForm(Form):
+	pin = IntegerField('Pin',  [validators.Length(min=4,max=6)])
+	password = PasswordField('Password', [
+		validators.DataRequired(),
+		validators.Length(min=10, max=40),
+		validators.EqualTo('confirm', message='Passwords do not match')
+	])
+	confirm = PasswordField('Confirm Password')
+
 
 class TransferForm(Form):
 	transferTo = IntegerField('Transfer')

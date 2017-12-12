@@ -1,9 +1,37 @@
 {% extends "html/layout.html" %}
 {% block body %}
   
-  <h1>Welcome to the Transfer page</h1>
-  <div>
-    <p></p>
+  <h1>Transfer from your Account to different one! </h1>
 
+  <div> 
+    <p>
+    Here <strong>{{session.fname}}</strong>, you can transfer money from your account to someone else! Simply enter an amount and destination account number.
+    </p> 
   </div>
+
+  
+
+  <form action="" method="POST">
+
+    <div>
+      <label>Account Type</label>
+      <select name="accountType" class="form-control">
+        <option value="saving">Savings</option>
+        <option value="checking">Checking</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Amount</label>
+      <input type="number" name="amount" class="form-control" value={{request.form.amount}}>
+    </div>
+
+    <div class="form-group">
+      <label>Account Destination</label>
+      <input type="number" name="destinationNum" class="form-control" value={{request.form.destinationNum}}>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+
+
+  </form>
 {% endblock %}

@@ -41,10 +41,6 @@ app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 mysql = MySQL(app)
 
 
-
-
-
-
 # Home page 
 @app.route('/')
 def home():
@@ -68,11 +64,12 @@ def register():
 		curs = mysql.connection.cursor()
 
 		result = curs.execute("SELECT * FROM User WHERE ssn = %s;", [ssn])
-		print(result)
+		
 
 		if result > 0:
 			error = "User with this SSN already exists!"
 			return render_template('html/register.html')
+
 		else:
 
 			curs.execute("INSERT INTO User (fname, lname, email, ssn, password) VALUES (%s, %s, %s, %s, %s);", (firstName, lastName, email, ssn, password))
@@ -95,9 +92,8 @@ def register():
 @app.route('/logout')
 def logout():
 	session.clear()
+	flash('You are now logged out', 'success')
 	return redirect(url_for('home'))
-
-
 
 
 # Login
@@ -120,15 +116,17 @@ def login():
 			# Hash the password candidate and compare.
 			if sha256_crypt.verify(passwordCandidate, password):
 				session['logged_in'] = True
-				session['firstName'] = data['fname']
+				session['userid'] = data['id']
+				session['fname'] = data['fname']
+				session['lname'] = data['lname']
+				session['ssn'] = data['ssn']
 
-				print('do I get here 3')
 				flash('You are now logged in', 'success')
 				return redirect(url_for('transfer'))
 			else:
 				error = 'Invalid login!'
 				curs.close()
-				return render_template('html/login.html')
+				return render_template('html/login.html', error=error)
 		else:
 			error = 'Username not found'
 			return render_template('html/login.html', error=error)
@@ -148,10 +146,38 @@ def is_logged_in(f):
 			return redirect(url_for('login'))
 	return wrap
 
-# Logged in 
-@app.route('/transfer')
+# Transfer funds to another account.
+@app.route('/transfer', methods=['GET', 'POST'])
 @is_logged_in
 def transfer():
+
+	if request.method == 'POST':
+
+		accType = request.form.get('accountType')
+		amount = request.form['amount']	
+		dest = request.form['destinationNum']
+
+
+		print(accType,amount,dest)
+
+		curs = mysql.connection.cursor()
+
+		results = curs.execute("SELECT * FROM Accounts where id = %s;", [dest])
+
+		if results > 0:
+			data = curs.fetchall()
+			
+			
+
+
+		else:
+			error = 'That account number does not exist!'
+			curs.close()
+			return render_template('html/transfer.html', error=error)
+
+
+
+
 	return render_template('html/transfer.html')
 
 
@@ -160,6 +186,59 @@ def transfer():
 def logged_in():
 	flash("You logged in!", "success")
 	return redirect(url_for('transfer'))
+
+# If user has no account.
+@app.route('/no_account', methods=['GET', 'POST'])
+@is_logged_in
+def no_account():
+
+	form = AccountRegisterForm(request.form)
+	if request.method == 'POST':
+		pin = form.pin.data
+		password = form.password.data
+
+		# Encrypt the password BEFORE storing it into the database! 
+		password = sha256_crypt.encrypt(str(form.password.data))
+
+		# Create a connection to the DB.
+		curs = mysql.connection.cursor()
+
+		curs.execute("INSERT INTO Accounts (owner, password, pin) VALUES (%s, %s, %s);", (session['userid'], password, pin))
+
+		mysql.connection.commit()
+		curs.close()
+
+		flash('You now have an account!', 'success')
+
+		return redirect(url_for('account'))
+
+	return render_template('html/no_account.html', form=form)
+
+# Account 
+@app.route('/account', methods=['GET', 'POST'])
+@is_logged_in
+def account():
+
+	curs = mysql.connection.cursor()
+
+	results = curs.execute("SELECT * FROM Accounts where owner = %s;", [session['userid']])
+
+	if results > 0:
+
+
+		data = curs.fetchall()
+
+		session['accountLoaded'] = True
+		session['savingBalance'] = data[0]['savingBalance']
+		session['checkingBalance'] = data[0]['checkingBalance']
+
+		curs.close()
+		return render_template('html/account.html', data=data)
+
+	else:
+
+		return redirect(url_for('no_account'))
+
 
 
 
