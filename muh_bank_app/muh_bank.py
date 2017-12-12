@@ -56,14 +56,16 @@ def register():
 		name = form.name.data 
 		email = form.email.data
 		username = form.username.data
+
+		# Encrypt the password BEFORE storing it into the database! 
 		password = sha256_crypt.encrypt(str(form.password.data))
 
 
 	return render_template('html/register.html', form=form)
 
-@app.route('/logged_in')
-def logged_in():
-	return 'You\'re logged in!'
+
+
+
 
 @app.route('/logout')
 def logout():
@@ -86,6 +88,19 @@ def login():
 			return redirect(url_for('logged_in'))
 	return render_template('html/login.html', error=error)
 
+
+
+# Logged in 
+@app.route('/transfer')
+def transfer():
+
+	return render_template('html/transfer.html')
+
+
+@app.route('/logged_in')
+def logged_in():
+	flash("You logged in!", "success")
+	return redirect(url_for('transfer'))
 
 
 
