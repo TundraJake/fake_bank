@@ -7,14 +7,20 @@ muh_bank.py file
 import os
 import pymysql.cursors
 
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from flask_bootstrap import Bootstrap
 
+from flask_mysqldb import MySQL
+
+from .templates.forms.register import *
 
 from flask import Flask, request, session, g, redirect, url_for, abort, \
 	render_template, flash
+
+from passlib.hash import sha256_crypt
 
 app = Flask(__name__) # create the application instance :)
 app.config.from_object(__name__) # load config from this file , flaskr.py
@@ -33,27 +39,37 @@ app.config.from_envvar('MUHBANK_SETTINGS', silent=True)
 
 
 
+
+
 # Project views
 @app.route('/')
-def show_entries():
-	# db = get_db()
-	# cur = db.execute('select title, text from entries order by id desc')
-	# entries = cur.fetchall()
+def home():
+
 	return render_template('html/home.html')
 
+# Register
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-	return 1
+
+	form = RegisterForm(request.form)
+	if request.method == 'POST' and form.validate():
+		name = form.name.data 
+		email = form.email.data
+		username = form.username.data
+		password = sha256_crypt.encrypt(str(form.password.data))
+
+
+	return render_template('html/register.html', form=form)
 
 @app.route('/logged_in')
-def loggedIn():
+def logged_in():
 	return 'You\'re logged in!'
 
 @app.route('/logout')
 def logout():
-	session.pop('logged_in', None)
+	session.clear()
 	flash('You were logged out')
-	return redirect(url_for('show_entries'))
+	return redirect(url_for('home'))
 
 	
 @app.route('/login', methods=['GET', 'POST'])
@@ -67,7 +83,7 @@ def login():
 		else:
 			session['logged_in'] = True
 			flash('You were logged in')
-			return redirect(url_for('/logged_in'))
+			return redirect(url_for('logged_in'))
 	return render_template('html/login.html', error=error)
 
 
