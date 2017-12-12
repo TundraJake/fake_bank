@@ -3,9 +3,19 @@
   
   <h1>Account Details</h1>
   <div>
+    <p>Account ID: $ {{session['accountID']}} </p>
+    <p>First Name: {{session['fname']}} </p>
+    <p>Last Name: {{session['lname']}}</p>
+    <p>SSN (NOT REALLY!): {{session['ssn']}} </p>
+
+
     <p>Your Savings Balance: $ {{data[0]['savingBalance']}} </p>
     <p>Your Checking Balance: $ {{data[0]['checkingBalance']}} </p>
     <p>Your PIN is: {{data[0]['pin']}} </p>
+
+
+
+
 
   </div>
 {% endblock %}

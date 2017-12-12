@@ -67,8 +67,8 @@ def register():
 		
 
 		if result > 0:
-			error = "User with this SSN already exists!"
-			return render_template('html/register.html')
+			error = 'User with this SSN already exists!'
+			return render_template('html/register.html', error=error)
 
 		else:
 
@@ -157,8 +157,23 @@ def transfer():
 		amount = request.form['amount']	
 		dest = request.form['destinationNum']
 
+		# Convert string to int, assuming the value of amount is a string with numerical chars.
+		amount = int(amount)
+		# Needed to convert str to int, if never executed otherwise. 
+		dest = int(dest)
 
-		print(accType,amount,dest)
+
+		# Check for Negative amounts.
+		if amount < 0:
+			flash('Cannot transfer a negative amount!', 'danger')
+			return render_template('html/transfer.html')
+
+		# Check if trying to transfer to oneself.
+		if dest == session['accountID']:
+
+			flash('Why are you transfering to yourself? Wasted CPU cycles!', 'danger')
+			return render_template('html/transfer.html')
+
 
 		curs = mysql.connection.cursor()
 
@@ -167,7 +182,52 @@ def transfer():
 		if results > 0:
 			data = curs.fetchall()
 			
-			
+		############ Refactor into function ##############
+
+			destCheckBal = data[0]['checkingBalance']
+			destSaveBal = data[0]['savingBalance']
+
+			if accType == 'saving':
+
+				# print(type(destSaveBal), type(amount))
+				if (session['savingBalance'] - amount) < 0:
+
+					flash('You cannot overdraw from your SAVINGS account!', 'danger')
+					return render_template('html/transfer.html')
+
+				else:
+
+					# Update destination account saving balance first.
+					curs.execute("UPDATE Accounts SET savingBalance = %s WHERE id = %s;", (destSaveBal + amount, dest))
+
+					# Update transfering user account saving balance
+					curs.execute("UPDATE Accounts SET savingBalance = %s WHERE id = %s;", ((session['savingBalance'] - amount), session['accountID']))
+
+					# Hope this works!
+					mysql.connection.commit()
+
+			else: 
+				# print(type(destSaveBal), type(amount))
+				if (session['checkingBalance'] - amount) < 0:
+
+					flash('You cannot overdraw from your CHECKING account!', 'danger')
+					return render_template('html/transfer.html')
+
+				else:
+
+					# Update destination account saving balance first.
+					curs.execute("UPDATE Accounts SET checkingBalance = %s WHERE id = %s;", (destSaveBal + amount, dest))
+
+					# Update transfering user account saving balance
+
+
+					curs.execute("UPDATE Accounts SET checkingBalance = %s WHERE id = %s;", ((session['checkingBalance'] - amount), session['accountID']))
+
+					# Hope this works!
+					mysql.connection.commit()				
+
+
+		##################################################
 
 
 		else:
@@ -231,6 +291,7 @@ def account():
 		session['accountLoaded'] = True
 		session['savingBalance'] = data[0]['savingBalance']
 		session['checkingBalance'] = data[0]['checkingBalance']
+		session['accountID'] = data[0]['id']
 
 		curs.close()
 		return render_template('html/account.html', data=data)
