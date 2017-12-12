@@ -14,17 +14,8 @@
         <p>
         Welcome to <i>Muh Bank!</i>
       </p>
-      <div class=metanav>
-      {% if not session.logged_in %}
-        <a href="{{ url_for('login') }}">Log in</a>
-      {% else %}
-        <a href="{{ url_for('logout') }}">log out</a>
-      {% endif %}
-      </div>
-      {% for message in get_flashed_messages() %}
-        <div class=flash>{{ message }}</div>
-      {% endfor %}
-      {% block body %}{% endblock %}
+
+     
     </div>
 
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
