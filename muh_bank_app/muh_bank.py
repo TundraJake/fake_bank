@@ -146,6 +146,28 @@ def is_logged_in(f):
 			return redirect(url_for('login'))
 	return wrap
 
+
+def setSavingBalance(curs, amount):
+	# Update transfering user account saving balance
+	curs.execute("SELECT * FROM Accounts WHERE id = %s;", [session['accountID']])
+	# Get new session value
+	data = curs.fetchall()
+	session['savingBalance'] = data[0]['savingBalance']
+	total = (session['savingBalance'] - amount)
+
+	return total
+
+def setCheckingBalance(curs, amount):
+	# Update transfering user account saving balance
+	curs.execute("SELECT * FROM Accounts WHERE id = %s;", [session['accountID']])
+	# Get new session value
+	data = curs.fetchall()
+	session['checkingBalance'] = data[0]['checkingBalance']
+	total = (session['checkingBalance'] - amount)
+
+	return total
+
+
 # Transfer funds to another account.
 @app.route('/transfer', methods=['GET', 'POST'])
 @is_logged_in
@@ -154,8 +176,11 @@ def transfer():
 	if request.method == 'POST':
 
 		accType = request.form.get('accountType')
+		destAccType = request.form.get('destAccountType')
+
 		amount = request.form['amount']	
 		dest = request.form['destinationNum']
+
 
 		# Convert string to int, assuming the value of amount is a string with numerical chars.
 		amount = int(amount)
@@ -169,7 +194,7 @@ def transfer():
 			return render_template('html/transfer.html')
 
 		# Check if trying to transfer to oneself.
-		if dest == session['accountID']:
+		if dest == session['accountID'] and accType == destAccType:
 
 			flash('Why are you transfering to yourself? Wasted CPU cycles!', 'danger')
 			return render_template('html/transfer.html')
@@ -187,7 +212,7 @@ def transfer():
 			destCheckBal = data[0]['checkingBalance']
 			destSaveBal = data[0]['savingBalance']
 
-			if accType == 'saving':
+			if accType == 'savingBalance':
 
 				# print(type(destSaveBal), type(amount))
 				if (session['savingBalance'] - amount) < 0:
@@ -195,13 +220,27 @@ def transfer():
 					flash('You cannot overdraw from your SAVINGS account!', 'danger')
 					return render_template('html/transfer.html')
 
-				else:
-
+				elif destAccType == 'savingBalance':
 					# Update destination account saving balance first.
+					print('saving 1')
 					curs.execute("UPDATE Accounts SET savingBalance = %s WHERE id = %s;", (destSaveBal + amount, dest))
 
-					# Update transfering user account saving balance
-					curs.execute("UPDATE Accounts SET savingBalance = %s WHERE id = %s;", ((session['savingBalance'] - amount), session['accountID']))
+
+					total = setSavingBalance(curs, amount)
+					curs.execute("UPDATE Accounts SET savingBalance = %s WHERE id = %s;", (total, session['accountID']))
+
+					# Hope this works!
+					mysql.connection.commit()
+
+
+				else:
+					print('checking 1')
+					# Update destination account checking balance first.
+					curs.execute("UPDATE Accounts SET checkingBalance = %s WHERE id = %s;", (destCheckBal + amount, dest))
+
+
+					total = setSavingBalance(curs, amount)
+					curs.execute("UPDATE Accounts SET savingBalance = %s WHERE id = %s;", (total, session['accountID']))
 
 					# Hope this works!
 					mysql.connection.commit()
@@ -213,15 +252,28 @@ def transfer():
 					flash('You cannot overdraw from your CHECKING account!', 'danger')
 					return render_template('html/transfer.html')
 
-				else:
+				elif destAccType == 'savingBalance':
 
 					# Update destination account saving balance first.
-					curs.execute("UPDATE Accounts SET checkingBalance = %s WHERE id = %s;", (destSaveBal + amount, dest))
+					print('saving 2')
+					curs.execute("UPDATE Accounts SET savingBalance = %s WHERE id = %s;", (destSaveBal + amount, dest))
 
+
+					total = setCheckingBalance(curs, amount)
 					# Update transfering user account saving balance
+					curs.execute("UPDATE Accounts SET checkingBalance = %s WHERE id = %s;", (total, session['accountID']))
+
+					# Hope this works!
+					mysql.connection.commit()	
+				else:
+
+					print('checking 2')
+					# Update destination account saving balance first.
+					curs.execute("UPDATE Accounts SET checkingBalance = %s WHERE id = %s;", (destCheckBal + amount, dest))
 
 
-					curs.execute("UPDATE Accounts SET checkingBalance = %s WHERE id = %s;", ((session['checkingBalance'] - amount), session['accountID']))
+					total = setCheckingBalance(curs, amount)
+					curs.execute("UPDATE Accounts SET checkingBalance = %s WHERE id = %s;", (total, session['accountID']))
 
 					# Hope this works!
 					mysql.connection.commit()				
@@ -236,7 +288,7 @@ def transfer():
 			return render_template('html/transfer.html', error=error)
 
 
-
+		curs.close()
 
 	return render_template('html/transfer.html')
 
