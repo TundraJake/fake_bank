@@ -27,7 +27,3 @@ class AccountRegisterForm(Form):
 		validators.EqualTo('confirm', message='Passwords do not match')
 	])
 	confirm = PasswordField('Confirm Password')
-
-
-class TransferForm(Form):
-	transferTo = IntegerField('Transfer')
