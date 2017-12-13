@@ -44,13 +44,17 @@ mysql = MySQL(app)
 # Home page 
 @app.route('/')
 def home():
+
+	# render_template takes an html page and renders it. 
 	return render_template('html/home.html')
 
 # Register
 @app.route('/register', methods=['GET', 'POST'])
 def register():
 
+	# Load the form class by passing request.form to the UserRegisterForm class.
 	form = UserRegisterForm(request.form)
+
 	if request.method == 'POST' and form.validate():
 		firstName = form.firstName.data 
 		lastName = form.lastName.data
@@ -65,11 +69,12 @@ def register():
 
 		result = curs.execute("SELECT * FROM User WHERE ssn = %s;", [ssn])
 		
-
+		# If any results
 		if result > 0:
 			error = 'User with this SSN already exists!'
 			return render_template('html/register.html', error=error)
 
+		# If no results, register the new user.
 		else:
 
 			curs.execute("INSERT INTO User (fname, lname, email, ssn, password) VALUES (%s, %s, %s, %s, %s);", (firstName, lastName, email, ssn, password))
@@ -230,7 +235,6 @@ def transfer():
 					total = setSavingBalance(curs, amount)
 					curs.execute("UPDATE Accounts SET savingBalance = %s WHERE id = %s;", (total, session['accountID']))
 
-					# Hope this works!
 					mysql.connection.commit()
 
 
@@ -243,7 +247,6 @@ def transfer():
 					total = setSavingBalance(curs, amount)
 					curs.execute("UPDATE Accounts SET savingBalance = %s WHERE id = %s;", (total, session['accountID']))
 
-					# Hope this works!
 					mysql.connection.commit()
 
 			else: 
@@ -264,7 +267,6 @@ def transfer():
 					# Update transfering user account saving balance
 					curs.execute("UPDATE Accounts SET checkingBalance = %s WHERE id = %s;", (total, session['accountID']))
 
-					# Hope this works!
 					mysql.connection.commit()	
 				else:
 
@@ -276,24 +278,22 @@ def transfer():
 					total = setCheckingBalance(curs, amount)
 					curs.execute("UPDATE Accounts SET checkingBalance = %s WHERE id = %s;", (total, session['accountID']))
 
-					# Hope this works!
 					mysql.connection.commit()				
 
 
 		##################################################
-
 
 		else:
 			error = 'That account number does not exist!'
 			curs.close()
 			return render_template('html/transfer.html', error=error)
 
-
 		curs.close()
 
 	return render_template('html/transfer.html')
 
 
+# Logged in, immediately redirects. 
 @app.route('/logged_in')
 @is_logged_in
 def logged_in():
@@ -332,23 +332,30 @@ def no_account():
 @is_logged_in
 def account():
 
+	# Create a connection the db.
 	curs = mysql.connection.cursor()
 
+	# Query, results is an integer.
 	results = curs.execute("SELECT * FROM Accounts where owner = %s;", [session['userid']])
 
+	# If any results, 
 	if results > 0:
 
-
+		# You still need to get the data.
 		data = curs.fetchall()
 
+		# Load the session, values stores in the session dictionary can be chosen.
 		session['accountLoaded'] = True
 		session['savingBalance'] = data[0]['savingBalance']
 		session['checkingBalance'] = data[0]['checkingBalance']
 		session['accountID'] = data[0]['id']
 
+		# Close the connection.
 		curs.close()
+
 		return render_template('html/account.html', data=data)
 
+	# No results. 
 	else:
 
 		return redirect(url_for('no_account'))

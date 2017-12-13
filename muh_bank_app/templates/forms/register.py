@@ -1,3 +1,8 @@
+'''
+Jacob McKenna 
+UAF CS492 Computer Security I 
+	register.py - Stores the forms for register Users and Accounts.
+'''
 from wtforms import Form, BooleanField, TextField, HiddenField, PasswordField,\
 DateTimeField, validators, IntegerField, SubmitField, SelectField, StringField
 
@@ -27,7 +32,3 @@ class AccountRegisterForm(Form):
 		validators.EqualTo('confirm', message='Passwords do not match')
 	])
 	confirm = PasswordField('Confirm Password')
-
-
-class TransferForm(Form):
-	transferTo = IntegerField('Transfer')
