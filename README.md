@@ -9,10 +9,10 @@ clone the repositor and navigate to fake_bank.
 
 You will need to have a MySQL database running named MuhBank.
 
-`mysql -u root -p`
-`CREATE DATABASE MuhBank;`
+`mysql -u root -p`.
+`CREATE DATABASE MuhBank;`.
 
-`exit`
+`exit`.
 
 Run the schema.sql file into mysql, creating the tables for you.
 
