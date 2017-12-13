@@ -11,6 +11,7 @@ You will need to have a MySQL database running named MuhBank.
 
 `mysql -u root -p`
 `CREATE DATABASE MuhBank;`
+
 `exit`
 
 Run the schema.sql file into mysql, creating the tables for you.
