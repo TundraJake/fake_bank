@@ -35,3 +35,7 @@ CREATE TABLE IF NOT EXISTS Accounts (
 	FOREIGN KEY (owner) REFERENCES User(id)
 
 ) AUTO_INCREMENT = 4000000;
+
+
+
+SELECT fname, lname, ssn, email, User.id AS user_id, Accounts.id AS acc_id, savingBalance, checkingBalance FROM User INNER JOIN Accounts ON User.id = Accounts.owner;

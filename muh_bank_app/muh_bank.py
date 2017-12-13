@@ -228,7 +228,6 @@ def transfer():
 
 				elif destAccType == 'savingBalance':
 					# Update destination account saving balance first.
-					print('saving 1')
 					curs.execute("UPDATE Accounts SET savingBalance = %s WHERE id = %s;", (destSaveBal + amount, dest))
 
 
@@ -239,7 +238,6 @@ def transfer():
 
 
 				else:
-					print('checking 1')
 					# Update destination account checking balance first.
 					curs.execute("UPDATE Accounts SET checkingBalance = %s WHERE id = %s;", (destCheckBal + amount, dest))
 
@@ -259,7 +257,6 @@ def transfer():
 				elif destAccType == 'savingBalance':
 
 					# Update destination account saving balance first.
-					print('saving 2')
 					curs.execute("UPDATE Accounts SET savingBalance = %s WHERE id = %s;", (destSaveBal + amount, dest))
 
 
@@ -270,7 +267,6 @@ def transfer():
 					mysql.connection.commit()	
 				else:
 
-					print('checking 2')
 					# Update destination account saving balance first.
 					curs.execute("UPDATE Accounts SET checkingBalance = %s WHERE id = %s;", (destCheckBal + amount, dest))
 
@@ -359,14 +355,4 @@ def account():
 	else:
 
 		return redirect(url_for('no_account'))
-
-
-
-
-
-
-
-
-
-
 
